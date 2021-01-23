@@ -1,3 +1,4 @@
+from typing import Union, Iterator
 import random
 from time import time
 from hashlib import sha256
@@ -7,6 +8,19 @@ from cuaima import connections, server, utils
 
 SYNTH_NEW = '/s_new'
 SYNTH_FREE = '/s_free'
+
+
+def interpret_patterns(kwargs: dict[str, Union[float, Iterator]]):
+    """ interprets patterns present in dict
+    """
+    d = {}
+    for k, v in kwargs.items():
+        try:
+            next_value = next(v)
+            d[k] = next_value
+        except TypeError:  # we check if v is an iterator
+            d[k] = v
+    return d
 
 
 class BaseSynth(server.TalksToServerMixin):
@@ -26,7 +40,8 @@ class BaseSynth(server.TalksToServerMixin):
         message.append(self.node)
         message.append(0)
         message.append(1)
-        message.extend(utils.arg_pairs_from_dict(kwargs))
+        interpreted_kwargs = interpret_patterns(kwargs)
+        message.extend(utils.arg_pairs_from_dict(interpreted_kwargs))
         self.client.send_message(SYNTH_NEW, message)
         utils.debug_message(f'sent message to supercollider: {SYNTH_NEW} {message}')
         self.node += 1
@@ -41,9 +56,13 @@ class InstantiableSynth(BaseSynth):
     _cin_args = tuple()
     _cout_args = tuple()
 
+    _all_synths_instances = {}
+
     def __init__(self, name: str = None):
         super().__init__(self._instrument, name)
         self._build_ports()
+        self._all_synths_instances[self.name] = self
+        print(self._all_synths_instances)
         utils.help_text(self._make_banner_text())
 
     def _build_ports(self):
@@ -80,6 +99,13 @@ class InstantiableSynth(BaseSynth):
         ])
 
         return banner_text
+
+    @classmethod
+    def get_by_name(cls, name):
+        """ Gets a synth by its name
+        """
+        return cls._all_synths_instances.get(name, None)
+
 
     def __repr__(self):
         return f'{self.name} ({self.instrument})'
