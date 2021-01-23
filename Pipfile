@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-python-osc = "*"
+python-osc = "~=1.7.4"
 
 [dev-packages]
 
