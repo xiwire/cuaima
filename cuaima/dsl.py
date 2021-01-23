@@ -1,4 +1,5 @@
 from cuaima.utils import help_text
+from functools import partial
 
 help_text()
 help_text('Welcome to \033[31;7;4m~CUAIMA~\033[0m')
@@ -8,5 +9,7 @@ help_text()
 
 from cuaima.synth import Biast, PutOutStereo
 from cuaima.connections import DEFAULT_PORT_MANAGER as _DEFAULT_PORT_MANAGER
-
-show_connections = lambda: _DEFAULT_PORT_MANAGER._connections
+conns = partial(print, _DEFAULT_PORT_MANAGER._connections)
+from cuaima.scheduler import DEFAULT_SCHEDULER as _DEFAULT_SCHEDULER
+sched = partial(_DEFAULT_SCHEDULER.schedule)
+from cuaima.patterns import *
