@@ -1,6 +1,9 @@
 from enum import Enum
 from typing import Union
 
+from cuaima import utils
+
+
 # Arbitrary unused bus
 # TODO: query supercollider to get a new bus
 STARTING_EMPTY_BUS = 666
@@ -40,6 +43,7 @@ class PortManager:
 
         if (port_b, port_a) not in self._connections:
             self._connections.add((self._last_empty_bus, port_a, port_b))
+            utils.debug_message(f'CONNECTED PORTS {port_a} AND {port_b} ON BUS {self._last_empty_bus}')
             self._last_empty_bus += 1
 
 
@@ -52,6 +56,7 @@ class Port:
 
     def __init__(
             self,
+            module: 'Synth',
             orientation: Union[Orientation, str],
             rate: Union[Rate, str],
             manager: PortManager = DEFAULT_PORT_MANAGER):
@@ -65,9 +70,13 @@ class Port:
             raise ValueError('rate must be one of ("a", "c")') from exc
         self.manager = manager
         self.manager.register(self)
+        self.module = module
 
     def __gt__(self, other_port):
         self.manager.connect(self, other_port)
 
+    def __lt__(self, other_port):
+        self.manager.connect(self, other_port)
+
     def __repr__(self):
-        print
+        return f'{self.rate} {self.orientation} PORT FOR {self.module}'

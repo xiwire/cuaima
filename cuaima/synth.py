@@ -1,5 +1,6 @@
-import itertools
 import random
+from time import time
+from hashlib import sha256
 
 from cuaima import connections, server, utils
 
@@ -11,10 +12,11 @@ SYNTH_FREE = '/s_free'
 class BaseSynth(server.TalksToServerMixin):
     """ Manages SuperCollider synth nodes
     """
-    def __init__(self, instrument, _server=server.DEFAULT_SERVER):
+    def __init__(self, instrument: str, name: str = None, _server=server.DEFAULT_SERVER):
         super().__init__(_server)
         self.node = 1000
         self.instrument = instrument
+        self.name = name or f'{self.instrument}#{sha256(str(time()).encode()).hexdigest()[:4]}'
 
     def call(self, **kwargs):
         """ Call to init the synth in the server
@@ -39,20 +41,20 @@ class InstantiableSynth(BaseSynth):
     _cin_args = tuple()
     _cout_args = tuple()
 
-    def __init__(self, **arg_pairs):
-        super().__init__(self._instrument, **arg_pairs)
+    def __init__(self, name: str = None):
+        super().__init__(self._instrument, name)
         self._build_ports()
         utils.help_text(self._make_banner_text())
 
     def _build_ports(self):
         for port in self._ain_args:
-            self.__setattr__(port, connections.Port(orientation='in', rate='a'))
+            self.__setattr__(port, connections.Port(self, orientation='in', rate='a'))
         for port in self._aout_args:
-            self.__setattr__(port, connections.Port(orientation='out', rate='a'))
+            self.__setattr__(port, connections.Port(self, orientation='out', rate='a'))
         for port in self._cin_args:
-            self.__setattr__(port, connections.Port(orientation='in', rate='c'))
+            self.__setattr__(port, connections.Port(self, orientation='in', rate='c'))
         for port in self._cout_args:
-            self.__setattr__(port, connections.Port(orientation='out', rate='c'))
+            self.__setattr__(port, connections.Port(self, orientation='out', rate='c'))
 
     def play(self, **kwargs):
         """ shortcut to call
@@ -79,6 +81,9 @@ class InstantiableSynth(BaseSynth):
 
         return banner_text
 
+    def __repr__(self):
+        return f'{self.name} ({self.instrument})'
+
 
 class Biast(InstantiableSynth):
     _instrument = 'biast'
@@ -96,3 +101,17 @@ class Biast(InstantiableSynth):
     _aout_args = (
         'out_bus',
     )
+
+
+class PutOutStereo(InstantiableSynth):
+    _instrument = 'putOutStereo'
+    _description = 'A stereo output module with built-in compressor and limiter'
+
+    _ain_args = {
+        'inBus_l',
+        'inBus_r',
+    }
+
+    _aout_args = {
+        'outBus',
+    }
