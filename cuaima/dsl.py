@@ -6,4 +6,4 @@ help_text('A live coding language made in python')
 help_text('FUN FACT: the cuaima is the second biggest venomous snake in the world')
 help_text()
 
-from cuaima.synth import Biast, Yuno
+from cuaima.synth import Biast
