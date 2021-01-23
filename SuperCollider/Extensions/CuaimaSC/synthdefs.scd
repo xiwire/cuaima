@@ -4,9 +4,13 @@
 s.waitForBoot {
     var pathsToAdd;
 
-    pathsToAdd = Array.fill(~synthdefsToAdd.size, {
+    for(0, ~synthdefsToAdd.size - 1, {
         arg i;
-        ~workingDirectory ++ "/" ++ ~synthdefsToAdd[i];
+        var synthDefName, pathToLoad;
+
+        synthDefName = ~synthdefsToAdd[i];
+        pathToLoad = ~workingDirectory ++ "/" ++ synthDefName ++ "/" ++ synthDefName ++ ".scd";
+
+        pathToLoad.loadPaths;
     });
-    pathsToAdd.loadPaths;
 }
