@@ -2,4 +2,4 @@
 VERBOSE = True
 
 # Whether to output debug information (i.e. supercollider messages)
-DEBUG = True
+DEBUG = False
