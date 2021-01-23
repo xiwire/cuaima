@@ -16,3 +16,8 @@ def help_text(*args, **kwargs):
     """
     if config.VERBOSE:
         print(*args, **kwargs)
+
+
+def debug_message(*args, **kwargs):
+    if config.DEBUG:
+        print('\033[2m[DEBUG]', *args, '\033[0m', **kwargs)
