@@ -62,18 +62,37 @@ class InstantiableSynth(BaseSynth):
         super().__init__(self._instrument, name)
         self._build_ports()
         self._all_synths_instances[self.name] = self
-        print(self._all_synths_instances)
         utils.help_text(self._make_banner_text())
 
     def _build_ports(self):
         for port in self._ain_args:
-            self.__setattr__(port, connections.Port(self, orientation='in', rate='a'))
+            self.__setattr__(
+                port,
+                connections.Port(port,
+                                 self,
+                                 orientation=connections.Orientation.IN,
+                                 rate=connections.Rate.AUDIO))
         for port in self._aout_args:
-            self.__setattr__(port, connections.Port(self, orientation='out', rate='a'))
+            self.__setattr__(
+                port,
+                connections.Port(port,
+                                 self,
+                                 orientation=connections.Orientation.OUT,
+                                 rate=connections.Rate.AUDIO))
         for port in self._cin_args:
-            self.__setattr__(port, connections.Port(self, orientation='in', rate='c'))
+            self.__setattr__(
+                port,
+                connections.Port(port,
+                                 self,
+                                 orientation=connections.Orientation.IN,
+                                 rate=connections.Rate.CONTROL))
         for port in self._cout_args:
-            self.__setattr__(port, connections.Port(self, orientation='out', rate='c'))
+            self.__setattr__(
+                port,
+                connections.Port(port,
+                                 self,
+                                 orientation=connections.Orientation.OUT,
+                                 rate=connections.Rate.CONTROL))
 
     def play(self, **kwargs):
         """ shortcut to call

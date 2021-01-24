@@ -10,13 +10,13 @@ STARTING_EMPTY_BUS = 666
 
 
 class Rate(Enum):
-    AUDIO = 'a'
-    CONTROL = 'c'
+    AUDIO = 'AUDIO'
+    CONTROL = 'CONTROL'
 
 
 class Orientation(Enum):
-    IN = 'in'
-    OUT = 'out'
+    IN = 'IN'
+    OUT = 'OUT'
 
 
 class PortManager:
@@ -56,6 +56,7 @@ class Port:
 
     def __init__(
             self,
+            name: str,
             module: 'Synth',
             orientation: Union[Orientation, str],
             rate: Union[Rate, str],
@@ -63,14 +64,15 @@ class Port:
         try:
             self.orientation = Orientation(orientation)
         except ValueError as exc:
-            raise ValueError('orientation must be one of ("in", "out")') from exc
+            raise ValueError('orientation must be one of ("IN", "OUT")') from exc
         try:
             self.rate = Rate(rate)
         except ValueError as exc:
-            raise ValueError('rate must be one of ("a", "c")') from exc
+            raise ValueError('rate must be one of ("AUDIO", "CONTROL")') from exc
+        self.name = name
+        self.module = module
         self.manager = manager
         self.manager.register(self)
-        self.module = module
 
     def __gt__(self, other_port):
         self.manager.connect(self, other_port)
@@ -79,4 +81,4 @@ class Port:
         self.manager.connect(self, other_port)
 
     def __repr__(self):
-        return f'{self.rate} {self.orientation} PORT FOR {self.module}'
+        return f'PORT ({self.name} {self.module} {self.rate.value} {self.orientation.value})'
