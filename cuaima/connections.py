@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Union
 
-from cuaima import utils
+from cuaima import server, utils
 
 
 # Arbitrary unused bus
@@ -23,28 +23,49 @@ class PortManager:
     _ports: set['Port']
     _connections: set[tuple['Port', 'Port']]
 
-    def __init__(self):
+    def __init__(self, server: server.Server = server.DEFAULT_SERVER):
         self._ports = set()
         self._connections = set()
         self._last_empty_bus = STARTING_EMPTY_BUS
+        self._server = server
 
     def register(self, port: 'Port'):
         """ Register a new port
         """
         self._ports.add(port)
 
-    def connect(self, port_a: 'Port', port_b: 'Port'):
+    def connect(self, out_port: 'Port', in_port: 'Port'):
         """ Connect two ports
         """
-        if port_a.rate != port_b.rate:
+        if in_port.rate != out_port.rate:
             raise ValueError('the ports to connect have different rates')
-        if port_a.orientation == port_b.orientation:
+        if in_port.orientation == out_port.orientation:
             raise ValueError('the ports to connect have the same orientation')
+        if out_port.orientation == Orientation.IN:
+            in_port, out_port = out_port, in_port
 
-        if (port_b, port_a) not in self._connections:
-            self._connections.add((self._last_empty_bus, port_a, port_b))
-            utils.debug_message(f'CONNECTED PORTS {port_a} AND {port_b} ON BUS {self._last_empty_bus}')
+        if (in_port, out_port) not in self._connections:
+            connection_t = (in_port, out_port)
+            self._connections.add(connection_t)
+            utils.debug_message(f'CONNECTED {out_port} TO {in_port} ON BUS {self._last_empty_bus}')
+            if in_port.rate == Rate.CONTROL:
+                self._server_connect_control_port(in_port, out_port, self._last_empty_bus)
+            else:
+                self._server_connect_audio_port(in_port, out_port, self._last_empty_bus)
             self._last_empty_bus += 1
+
+    def _server_connect_control_port(self, in_port, out_port, bus_index):
+        client = self._server.client
+        # we set the out port to the bus
+        client.send_message('/n_set', [out_port.module.node, out_port.name, bus_index])
+        # and we map the in port's value to that bus
+        client.send_message('/n_map', [in_port.module.node, in_port.name, bus_index])
+
+    def _server_connect_audio_port(self, in_port, out_port, bus_index):
+        client = self._server.client
+        # we set both in and out ports to the same bus
+        client.send_message('/n_set', [out_port.module.node, out_port.name, bus_index])
+        client.send_message('/n_set', [in_port.module.node, in_port.name, bus_index])
 
 
 DEFAULT_PORT_MANAGER = PortManager()

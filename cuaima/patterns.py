@@ -1,25 +1,43 @@
 import random
 
 
-def seq(*args):
+class Pattern:
     """ Sequence
     """
-    i = 0
-    while 1:
-        yield args[i]
-        i += 1
-        i %= len(args)
+    def __init__(self, *args):
+        self.index = 0
+        self.collection = args
+
+    def interpret(self):
+        """ Interpret the pattern and return the next item in pattern
+        TODO: recursively interpret patterns
+        """
+        return next(self)
 
 
-def rand(*args):
-    """ Random
+class Lonely(Pattern):
+    """ A workaround for lonely params
     """
-    while 1:
-        yield random.choice(args)
+
+    def __next__(self):
+        return self.collection[0]
 
 
-def arp(*args):
-    """ Arpeggiate
+class Sequence(Pattern):
+    """ Returns the next value in the collection every time, looping around
+    once gotten to the end of the collection
     """
-    while 1:
-        yield from (seq(*chord) for chord in args)
+    def __next__(self):
+        chosen = self.collection[self.index]
+        self.index += 1
+        self.index %= len(self.collection)
+        return chosen
+
+
+class Random(Pattern):
+    """ Random choice among the patterned collection, can repeat the same value
+    multiple times in a row
+    """
+    def __next__(self):
+        chosen = random.choice(self.collection)
+        return chosen

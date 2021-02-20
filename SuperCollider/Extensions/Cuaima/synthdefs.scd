@@ -1,5 +1,5 @@
-~workingDirectory = File.getcwd ++ "/SuperCollider/Extensions/CuaimaSC";
-~synthdefsToAdd = ["biast"];
+~workingDirectory = "SuperCollider/Extensions/Cuaima";
+~synthdefsToAdd = ["biast/biast.scd", "utils/utils.scd", "fx/fx.scd", "basic/oscs.scd"];
 
 s.waitForBoot {
     var pathsToAdd;
@@ -9,7 +9,7 @@ s.waitForBoot {
         var synthDefName, pathToLoad;
 
         synthDefName = ~synthdefsToAdd[i];
-        pathToLoad = ~workingDirectory ++ "/" ++ synthDefName ++ "/" ++ synthDefName ++ ".scd";
+        pathToLoad = ~workingDirectory ++ "/" ++ synthDefName;
 
         pathToLoad.loadPaths;
     });

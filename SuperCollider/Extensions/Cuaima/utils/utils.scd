@@ -1,3 +1,4 @@
+(
 SynthDef(\putOutStereo,
 	/*
 	A stereo output module, with built in limiter and compressor.
@@ -75,3 +76,38 @@ SynthDef(\mix6,
 		]));
 	}
 ).add;
+
+SynthDef(\matrixMixer,
+	/*
+	3 channel matrix mixer
+	*/
+	{
+		arg in_1=999, out_1=999, send_1_1=0.0, send_1_2=0.0, send_1_3=0.0,
+		    in_2=999, out_2=999, send_2_1=0.0, send_2_2=0.0, send_2_3=0.0,
+		    in_3=999, out_3=999, send_3_1=0.0, send_3_2=0.0, send_3_3=0.0;
+		var bIn_1, bIn_2, bIn_3;
+
+        bIn_1 = In.ar(in_1, 1);
+        bIn_2 = In.ar(in_2, 1);
+        bIn_3 = In.ar(in_3, 1);
+
+		Out.ar(out_1, Mix.ar([
+            bIn_1 * send_1_1;
+            bIn_2 * send_2_1;
+            bIn_3 * send_3_1;
+        ]));
+
+		Out.ar(out_2, Mix.ar([
+            bIn_1 * send_1_2;
+            bIn_2 * send_2_2;
+            bIn_3 * send_3_2;
+        ]));
+
+		Out.ar(out_3, Mix.ar([
+            bIn_1 * send_1_3;
+            bIn_2 * send_2_3;
+            bIn_3 * send_3_3;
+        ]));
+	}
+).add;
+)

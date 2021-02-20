@@ -1,4 +1,7 @@
+from pprint import pprint
+
 from cuaima import config
+
 
 def arg_pairs_from_dict(arg_pairs_dict: dict[str, float]) -> list[str]:
     """ Turn a dict of argument pairs into a format suitable for an OSC message
